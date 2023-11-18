@@ -1,15 +1,53 @@
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { Button } from "@chakra-ui/react";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalCloseButton,
+  ModalBody,
+} from "@chakra-ui/react";
+import { FormControl, FormLabel, FormHelperText } from "@chakra-ui/react";
+import { Input } from "@chakra-ui/react";
+import { useDisclosure } from "@chakra-ui/react";
+
+import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
+  AlertDialogCloseButton,
+} from "@chakra-ui/react";
 
 /* пункты меню в шапке */
 const navItems = [
   { name: "Home", path: "/" },
   { name: "Details", path: "/Details" },
+  { name: "Features", path: "/Features" },
 ];
 
 const Navigation = () => {
+  const [userData, setUserData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = React.useRef();
+
   // Стейт для работы с активной ссылкой (в которую пользователь тыкнулся)
   const [activeLink, setActiveLink] = useState("");
+
+  // состояние для модалки регистрации
+  const [isSignUpOpen, setSignUpOpen] = useState(false);
+
+  // состояние для модалки входа
+  const [isSignInOpen, setSignInOpen] = useState(false);
 
   // используем хук для роутинга (постраничный переход)
   const router = useRouter();
@@ -21,6 +59,13 @@ const Navigation = () => {
       router.push(path);
       setActiveLink(path);
     }
+  };
+
+  // обработка события отправки
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    console.log(userData);
   };
 
   return (
@@ -49,7 +94,126 @@ const Navigation = () => {
               </a>
             ))}
           </nav>
+
+          <div className="inline-flex items-center gap-2">
+            <Button
+              onClick={() => setSignUpOpen(!isSignUpOpen)}
+              colorScheme="teal"
+              variant="solid"
+            >
+              Sign up
+            </Button>
+            <Button
+              onClick={() => setSignInOpen(!isSignInOpen)}
+              colorScheme="teal"
+              variant="outline"
+            >
+              Sign in
+            </Button>
+          </div>
         </div>
+
+        {/* модалка регистрации  */}
+        <Modal
+          isOpen={isSignUpOpen}
+          onClose={() => setSignUpOpen(!isSignUpOpen)}
+        >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Registration Modal</ModalHeader>
+            <ModalCloseButton />
+            <form action="#" onClick={handleSubmit}>
+              <ModalBody>
+                <FormControl>
+                  <FormLabel>Email address</FormLabel>
+                  <Input
+                    type="email"
+                    onChange={(e) =>
+                      setUserData({ ...userData, email: e.target.value })
+                    }
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Password</FormLabel>
+                  <Input
+                    type="password"
+                    onChange={(e) =>
+                      setUserData({ ...userData, password: e.target.value })
+                    }
+                  />
+                </FormControl>
+              </ModalBody>
+
+              <ModalFooter>
+                <Button
+                  onClick={onOpen}
+                  colorScheme="blue"
+                  variant="outline"
+                  mr={3}
+                >
+                  Close
+                </Button>
+                <Button colorScheme="blue">Submit</Button>
+              </ModalFooter>
+            </form>
+          </ModalContent>
+        </Modal>
+
+        {/* модалка для входа  */}
+        <Modal
+          isOpen={isSignInOpen}
+          onClose={() => setSignInOpen(!isSignInOpen)}
+        >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Signin Modal</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Impedit
+              facere doloribus dignissimos reprehenderit corporis autem eius
+              accusamus ducimus hic magnam.
+            </ModalBody>
+
+            <ModalFooter>
+              <Button
+                colorScheme="blue"
+                mr={3}
+                onClick={() => setSignInOpen(!isSignInOpen)}
+              >
+                Close
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* alert dialog  */}
+        <AlertDialog
+          motionPreset="slideInBottom"
+          leastDestructiveRef={cancelRef}
+          onClose={onClose}
+          isOpen={isOpen}
+          isCentered
+        >
+          <AlertDialogOverlay />
+
+          <AlertDialogContent>
+            <AlertDialogHeader>Discard Changes?</AlertDialogHeader>
+            <AlertDialogCloseButton />
+            <AlertDialogBody>
+              Are you sure you want to discard all of your notes? 44 words will
+              be deleted.
+            </AlertDialogBody>
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={onClose}>
+                No
+              </Button>
+              <Button colorScheme="red" ml={3}>
+                Yes
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </header>
   );
