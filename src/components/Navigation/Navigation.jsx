@@ -42,6 +42,7 @@ const Navigation = () => {
   // хук для получения информации о пользователе (зарегистрирован/незарегистр)
   const { user, onLogout } = useAuth();
 
+  // состояния для alertDialog
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = React.useRef();
 
@@ -50,9 +51,6 @@ const Navigation = () => {
 
   // состояние для модалки регистрации
   const [isSignUpOpen, setSignUpOpen] = useState(false);
-
-  // состояние для модалки входа
-  const [isSignInOpen, setSignInOpen] = useState(false);
 
   // используем хук для роутинга (постраничный переход)
   const router = useRouter();
@@ -175,32 +173,6 @@ const Navigation = () => {
                 <Button colorScheme="blue">Submit</Button>
               </ModalFooter>
             </form>
-          </ModalContent>
-        </Modal>
-
-        <Modal
-          isOpen={isSignInOpen}
-          onClose={() => setSignInOpen(!isSignInOpen)}
-        >
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Signin Modal</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Impedit
-              facere doloribus dignissimos reprehenderit corporis autem eius
-              accusamus ducimus hic magnam.
-            </ModalBody>
-
-            <ModalFooter>
-              <Button
-                colorScheme="blue"
-                mr={3}
-                onClick={() => setSignInOpen(!isSignInOpen)}
-              >
-                Close
-              </Button>
-            </ModalFooter>
           </ModalContent>
         </Modal>
 
