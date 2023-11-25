@@ -10,7 +10,7 @@ import {
   ModalCloseButton,
   ModalBody,
 } from "@chakra-ui/react";
-import { FormControl, FormLabel, FormHelperText } from "@chakra-ui/react";
+import { FormControl, FormLabel, FormErrorMessage } from "@chakra-ui/react";
 import { Input } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/react";
 import { useAuth } from "../../auth/AuthContext";
@@ -39,12 +39,17 @@ const Navigation = () => {
     password: "",
   });
 
+  // Состояние для отслеживания ошибок
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
   // хук для получения информации о пользователе (зарегистрирован/незарегистр)
   const { user, onLogout } = useAuth();
 
   // состояния для alertDialog
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = React.useRef();
+  const [isDataEntered, setDataEntered] = useState(false);
 
   // Стейт для работы с активной ссылкой (в которую пользователь тыкнулся)
   const [activeLink, setActiveLink] = useState("");
@@ -55,6 +60,21 @@ const Navigation = () => {
   // используем хук для роутинга (постраничный переход)
   const router = useRouter();
 
+  // Функция для проверки валидности email
+  const isValidEmail = (email) => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
+
+  // Функция для проверки валидности пароля
+  const isValidPassword = (password) => {
+    // const passwordRegex =
+    //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$%\^&\*])[A-Za-z\d!@#\$%\^&\*]{8,}$/;
+    // return passwordRegex.test(password);
+
+    return password.length >= 8;
+  };
+
   // обработчик клика по пункту меню
   const linksHandler = (path) => {
     if (path !== activeLink) {
@@ -64,12 +84,43 @@ const Navigation = () => {
     }
   };
 
+  // Обработка изменения значения поля email
+  const handleEmailChange = (e) => {
+    setUserData({ ...userData, email: e.target.value }); // помещаем пользовательские данные в стейт
+    setEmailError(isValidEmail(e.target.value) ? "" : "Invalid email address");
+    setDataEntered(true);
+  };
+
+  // Обработка изменения значения поля password
+  const handlePasswordChange = (e) => {
+    setUserData({ ...userData, password: e.target.value }); // помещаем пользовательские данные в стейт
+    setPasswordError(isValidPassword(e.target.value) ? "" : "Invalid password");
+    setDataEntered(true);
+  };
+
+  // Обработчик потери фокуса для полей email, password
+  const handleBlur = (event) => {
+    if (event.target.type === "email") {
+      setEmailError(
+        isValidEmail(userData.email) ? "" : "Invalid email address"
+      );
+    }
+    if (event.target.type === "email") {
+      setPasswordError(
+        isValidPassword(userData.password) ? "" : "Invalid password"
+      );
+    }
+
+    // Проверяем, есть ли данные в полях. Если есть, устанавливам isDataEntered в true
+    setDataEntered(userData.email !== "" || userData.password !== "");
+  };
+
   // обработка события отправки
   const handleSubmit = (event) => {
     if (event.type === "click") {
       return;
     }
-    event.preventDefault();
+    event.preventDefault(); // предотвращение перезапуска страницы
   };
 
   return (
@@ -132,45 +183,71 @@ const Navigation = () => {
 
         <Modal
           isOpen={isSignUpOpen}
-          onClose={() => setSignUpOpen(!isSignUpOpen)}
+          onClose={() => {
+            // Добавляем проверку на isDataEntered
+            if (isDataEntered) {
+              onOpen(); // показываем AlertDialog
+            } else {
+              setSignUpOpen(false); // закрываем модальное окно
+            }
+          }}
         >
           <ModalOverlay />
           <ModalContent>
             <ModalHeader>Registration Modal</ModalHeader>
             <ModalCloseButton />
-            <form action="#" onClick={handleSubmit}>
+            <form action="#" onSubmit={handleSubmit}>
               <ModalBody>
-                <FormControl>
+                <FormControl
+                  isInvalid={emailError !== "" && userData.email !== ""}
+                >
                   <FormLabel>Email address</FormLabel>
                   <Input
+                    autoComplete="off"
                     type="email"
-                    onChange={(e) =>
-                      setUserData({ ...userData, email: e.target.value })
-                    }
+                    onChange={handleEmailChange}
+                    onBlur={(e) => handleBlur(e)}
                   />
+                  {userData.email !== "" && (
+                    <FormErrorMessage>{emailError}</FormErrorMessage>
+                  )}
                 </FormControl>
 
-                <FormControl>
+                <FormControl
+                  isInvalid={passwordError !== "" && userData.password !== ""}
+                >
                   <FormLabel>Password</FormLabel>
                   <Input
+                    autoComplete="off"
                     type="password"
-                    onChange={(e) =>
-                      setUserData({ ...userData, password: e.target.value })
-                    }
+                    onChange={handlePasswordChange}
+                    onBlur={(e) => handleBlur(e)}
                   />
+                  {userData.password !== "" && (
+                    <FormErrorMessage>{passwordError}</FormErrorMessage>
+                  )}
                 </FormControl>
               </ModalBody>
 
               <ModalFooter>
                 <Button
-                  onClick={onOpen}
+                  onClick={() => {
+                    // Добавляем проверку на isDataEntered
+                    if (isDataEntered) {
+                      onOpen(); // показываем AlertDialog
+                    } else {
+                      setSignUpOpen(false); // закрываем модальное окно
+                    }
+                  }}
                   colorScheme="blue"
                   variant="outline"
                   mr={3}
                 >
                   Close
                 </Button>
-                <Button colorScheme="blue">Submit</Button>
+                <Button type="submit" colorScheme="blue">
+                  Submit
+                </Button>
               </ModalFooter>
             </form>
           </ModalContent>
@@ -179,18 +256,19 @@ const Navigation = () => {
         <AlertDialog
           motionPreset="slideInBottom"
           leastDestructiveRef={cancelRef}
-          onClose={onClose}
-          isOpen={isOpen}
+          onClose={() => {
+            onClose(); // Закрываем AlertDialog
+            setSignUpOpen(false); // Закрываем модалку регистрации
+          }}
+          isOpen={isOpen && isDataEntered}
           isCentered
         >
           <AlertDialogOverlay />
-
           <AlertDialogContent>
             <AlertDialogHeader>Discard Changes?</AlertDialogHeader>
             <AlertDialogCloseButton />
             <AlertDialogBody>
-              Are you sure you want to discard all of your notes? 44 words will
-              be deleted.
+              Are you sure you want to discard all of your notes?
             </AlertDialogBody>
             <AlertDialogFooter>
               <Button ref={cancelRef} onClick={onClose}>
