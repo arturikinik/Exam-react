@@ -13,6 +13,7 @@ import {
 import { FormControl, FormLabel, FormHelperText } from "@chakra-ui/react";
 import { Input } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/react";
+import { useAuth } from "../../auth/AuthContext";
 
 import {
   AlertDialog,
@@ -23,6 +24,7 @@ import {
   AlertDialogOverlay,
   AlertDialogCloseButton,
 } from "@chakra-ui/react";
+import Link from "next/link";
 
 /* пункты меню в шапке */
 const navItems = [
@@ -36,6 +38,9 @@ const Navigation = () => {
     email: "",
     password: "",
   });
+
+  // хук для получения информации о пользователе (зарегистрирован/незарегистр)
+  const { user, onLogout } = useAuth();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = React.useRef();
@@ -63,9 +68,10 @@ const Navigation = () => {
 
   // обработка события отправки
   const handleSubmit = (event) => {
+    if (event.type === "click") {
+      return;
+    }
     event.preventDefault();
-
-    console.log(userData);
   };
 
   return (
@@ -110,10 +116,22 @@ const Navigation = () => {
             >
               Sign in
             </Button>
+
+            {user ? (
+              <button onClick={onLogout}>Logout</button>
+            ) : (
+              <Link
+                href="/LoginPage"
+                className={`cursor-pointer  ${
+                  router.pathname === "/LoginPage" ? "text-sky-600" : ""
+                }`}
+              >
+                Login
+              </Link>
+            )}
           </div>
         </div>
 
-        {/* модалка регистрации  */}
         <Modal
           isOpen={isSignUpOpen}
           onClose={() => setSignUpOpen(!isSignUpOpen)}
@@ -160,7 +178,6 @@ const Navigation = () => {
           </ModalContent>
         </Modal>
 
-        {/* модалка для входа  */}
         <Modal
           isOpen={isSignInOpen}
           onClose={() => setSignInOpen(!isSignInOpen)}
@@ -187,7 +204,6 @@ const Navigation = () => {
           </ModalContent>
         </Modal>
 
-        {/* alert dialog  */}
         <AlertDialog
           motionPreset="slideInBottom"
           leastDestructiveRef={cancelRef}
