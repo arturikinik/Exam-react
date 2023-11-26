@@ -19,17 +19,15 @@ const Cards = () => {
   // Функция подгрузки данных
   const fetchCardsData = async () => {
     try {
-      const response = await fetch(
-        `https://jsonplaceholder.typicode.com/photos?_limit=6`
-      );
+      const response = await fetch(`http://localhost:3000/products`);
 
       const data = await response.json();
 
       const formattedData = data.map((item) => ({
         id: item?.id,
-        title: item?.title,
-        description: item?.title,
-        imageUrl: item?.url,
+        title: item?.name,
+        description: item?.category,
+        imageUrl: item?.imgSrc,
       }));
 
       console.log(formattedData);

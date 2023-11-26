@@ -2,7 +2,11 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
-First, run the development server:
+- Download application
+- Run terminal inside this folder
+- Run yarn install for install dependencies
+- Start JSON Server with command `json-server --watch data.json`
+- Run the development server:
 
 ```bash
 npm run dev

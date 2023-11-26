@@ -9,9 +9,7 @@ async function handler(req, res) {
   const { id } = req.query;
 
   try {
-    const response = await fetch(
-      `https://jsonplaceholder.typicode.com/photos/${id}`
-    );
+    const response = await fetch(`http://localhost:3000/products/${id}`);
 
     const data = await response.json();
 
