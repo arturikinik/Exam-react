@@ -29,7 +29,7 @@ import Link from "next/link";
 /* пункты меню в шапке */
 const navItems = [
   { name: "Home", path: "/" },
-  { name: "Details", path: "/Details" },
+  { name: "Cards", path: "/Cards" },
   { name: "Features", path: "/Features" },
 ];
 
